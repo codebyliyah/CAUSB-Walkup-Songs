@@ -2,73 +2,284 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CAU Softball Walk-Up Songs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAU Softball Gameday Hub</title>
     <style>
-        body { font-family: 'Arial', sans-serif; background-color: #1a1a1a; color: white; text-align: center; }
-        h1 { margin-top: 20px; color: #ff0000; } /* Team Red */
-        .controls { margin-bottom: 20px; position: sticky; top: 0; background: #1a1a1a; padding: 10px; }
+        :root {
+            --cau-red: #cc0000;
+            --cau-green: #00cc66;
+            --cau-yellow: #ffcc00;
+            --bg-dark: #121212;
+            --card-bg: #1e1e1e;
+        }
+
+        body { 
+            font-family: 'Arial Black', sans-serif; 
+            background-color: var(--bg-dark); 
+            color: white; 
+            margin: 0; 
+            padding: 20px;
+        }
+
+        h1 { font-size: 3rem; color: var(--cau-red); text-shadow: 2px 2px black; margin-bottom: 30px; text-align: center; }
+        h2 { font-size: 2rem; border-bottom: 4px solid var(--cau-red); display: inline-block; padding-bottom: 10px; margin-left: 5%; }
+
+        /* LINEUP AREA */
+        #lineup-section {
+            background: #1a1a1a;
+            border: 4px solid var(--cau-red);
+            padding: 40px;
+            margin: 0 5% 50px 5%;
+            border-radius: 30px;
+        }
+
+        .lineup-grid {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        /* LONGWAYS CARD STYLE */
+        .player-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 20px;
+            width: 95%;
+            max-width: 900px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #333;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+        }
+
+        /* Starred/Bookmarked State */
+        .player-card.starred {
+            border: 4px solid var(--cau-yellow);
+            background: #2d2a1a;
+            transform: scale(1.02);
+        }
+
+        .player-img-main {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid var(--cau-red);
+            object-fit: cover;
+        }
+
+        .player-name { font-size: 1.4rem; flex: 1; text-align: left; margin-left: 20px; }
+
+        /* JUMBO BUTTONS */
+        button { border: none; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .play-btn { background: var(--cau-green); color: white; padding: 15px 25px; font-size: 1.3rem; }
+        .pitch-btn { background: #007bff; color: white; padding: 15px 25px; font-size: 1.3rem; }
+        .stop-btn { background: var(--cau-red); color: white; padding: 15px 25px; font-size: 1.3rem; }
+        .star-btn { background: #444; color: var(--cau-yellow); font-size: 1.5rem; padding: 10px 15px; border: 1px solid var(--cau-yellow); }
+        .star-btn.active { background: var(--cau-yellow); color: black; }
         
-        table { width: 90%; margin: auto; border-collapse: collapse; background: #333; border-radius: 10px; overflow: hidden; }
-        th { background-color: #444; padding: 15px; }
-        td { padding: 10px; border-bottom: 1px solid #555; vertical-align: middle; }
+        .arrow-btn { background: #333; color: white; padding: 10px; font-size: 1.2rem; margin: 0 2px; }
+        .remove-btn { background: #444; color: #ff9999; padding: 10px 15px; font-size: 1.2rem; margin-left: 10px; }
+
+        /* ROSTER SECTION */
+        .add-btn { background: var(--cau-red); color: white; padding: 25px; font-size: 1.4rem; width: 100%; border: 2px solid white; }
+        .added-state { background: var(--cau-green) !important; color: white !important; cursor: default; }
+
+        .table-container { width: 100%; display: flex; justify-content: center; }
+        table { width: 90%; max-width: 1100px; border-collapse: separate; border-spacing: 0 15px; }
+        tr { background: #1e1e1e; }
+        td { padding: 25px; font-size: 1.6rem; vertical-align: middle; }
+        td:first-child { border-radius: 25px 0 0 25px; }
+        td:last-child { border-radius: 0 25px 25px 0; }
+
+        .roster-img { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 4px solid var(--cau-red); }
+        .btn-row { display: flex; gap: 10px; align-items: center; }
         
-        .player-img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid #ff0000; }
-        .play-btn { background-color: #28a745; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .stop-btn { background-color: #dc3545; color: white; border: none; padding: 15px 30px; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; }
-        .play-btn:hover { background-color: #218838; }
+        .next-up-badge { display: none; position: absolute; top: -10px; left: -10px; background: var(--cau-yellow); color: black; padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; z-index: 5; }
+        .starred .next-up-badge { display: block; }
     </style>
 </head>
 <body>
 
-    <h1>🥎 Walk-Up Song Hub</h1>
+    <h1>🥎 CAU Softball Walk up Songs</h1>
     
-    <div class="controls">
-        <button class="stop-btn" onclick="stopSong()">🛑 STOP MUSIC</button>
+    <div id="lineup-section">
+        <div style="text-align:center;">
+            <button style="background:#444; color:white; padding:15px 30px; font-size:1.2rem; margin-bottom:30px; border-radius:10px;" onclick="resetLineup()">RESET FOR NEW GAME</button>
+        </div>
+        <div id="lineup-list" class="lineup-grid"></div>
     </div>
 
-    <table>
-        <tr>
-            <th>Photo</th>
-            <th>Player</th>
-            <th>Action</th>
-        </tr>
-        <tr>
-            <td><img src="maliyah.jpg" class="player-img" alt="Maliyah"></td>
-            <td><strong>Maliyah Ward #5</strong></td>
-            <td><button class="play-btn" onclick="playSong('maliyah.mp3')">▶ PLAY</button></td>
-        </tr>
-        <tr>
-            <td><img src="tamia.jpg" class="player-img" alt="Tamia"></td>
-            <td><strong>Tamia Polk #9</strong></td>
-            <td><button class="play-btn" onclick="playSong('tamia.mp3')">▶ PLAY</button></td>
-        </tr>
-        <tr>
-            <td><img src="jada.jpg" class="player-img" alt="Jada"></td>
-            <td><strong>Jada Roberts #11</strong></td>
-            <td><button class="play-btn" onclick="playSong('jada.mp3')">▶ PLAY</button></td>
-        </tr>
-        <tr>
-            <td><img src="andreya.jpg" class="player-img" alt="Andreya"></td>
-            <td><strong>Andreya Hunter #24</strong></td>
-            <td><button class="play-btn" onclick="playSong('andreya.mp3')">▶ PLAY</button></td>
-        </tr>
-    </table>
+    <h2>FULL ROSTER</h2>
+    <div class="table-container">
+        <table>
+            <tr>
+                <td><img src="madison.png" class="roster-img"></td>
+                <td>Madison Terry #2</td>
+                <td><button id="btn-2" class="add-btn" onclick="add('Madison Terry #2', 'madison.png', 'madison.mp3', null, 'btn-2')">+ ADD TO LINEUP</button></td>
+            </tr>
+            <tr>
+                <td><img src="makayla.png" class="roster-img"></td>
+                <td>Makayla Marquez #3</td>
+                <td><button id="btn-3" class="add-btn" onclick="add('Makayla Marquez #3', 'makayla.png', 'makayla.mp3', null, 'btn-3')">+ ADD TO LINEUP</button></td>
+            </tr>
+            <tr>
+                <td><img src="jadin.png" class="roster-img"></td>
+                <td>Jadin Broadnax #4</td>
+                <td><button id="btn-4" class="add-btn" onclick="add('Jadin Broadnax #4', 'jadin.png', 'jadin.mp3', null, 'btn-4')">+ ADD TO LINEUP</button></td>
+            </tr>
+            <tr>
+                <td><img src="maliyah.png" class="roster-img"></td>
+                <td>Maliyah Ward #5</td>
+                <td><button id="btn-5" class="add-btn" onclick="add('Maliyah Ward #5', 'maliyah.png', 'maliyah.mp3', null, 'btn-5')">+ ADD TO LINEUP</button></td>
+            </tr>
+            <tr>
+                <td><img src="giavanni.png" class="roster-img"></td>
+                <td>Giavanni D’Amico #6</td>
+                <td><button id="btn-6" class="add-btn" onclick="add('Giavanni D’Amico #6', 'giavanni.png', 'giavanni.mp3', null, 'btn-6')">+ ADD TO LINEUP</button></td>
+            </tr>
+            <tr>
+                <td><img src="summer.png" class="roster-img"></td>
+                <td>Summer Castro #7</td>
+                <td><button id="btn-7" class="add-btn" onclick="add('Summer Castro #7', 'summer.png', 'summer.mp3', null, 'btn-7')">+ ADD TO LINEUP</button></td>
+            </tr>
+            <tr>
+                <td><img src="gabriella.png" class="roster-img"></td>
+                <td>Gabriella Aleman #8</td>
+                <td><button id="btn-8" class="add-btn" onclick="add('Gabriella Aleman #8', 'gabriella.png', 'gabriella.mp3', null, 'btn-8')">+ ADD TO LINEUP</button></td>
+            </tr>
+            <tr>
+                <td><img src="tamia.png" class="roster-img"></td>
+                <td>Tamia Polk #9</td>
+                <td><button id="btn-9" class="add-btn" onclick="add('Tamia Polk #9', 'tamia.png', 'tamia.mp3', null, 'btn-9')">+ ADD TO LINEUP</button></td>
+            </tr>
+            <tr>
+                <td><img src="kya.png" class="roster-img"></td>
+                <td>Kya Hadnot #10</td>
+                <td><button id="btn-10" class="add-btn" onclick="add('Kya Hadnot #10', 'kya.png', 'kya.mp3', null, 'btn-10')">+ ADD TO LINEUP</button></td>
+            </tr>
+            <tr>
+                <td><img src="jada.png" class="roster-img"></td>
+                <td>Jada Roberts #11</td>
+                <td><button id="btn-11" class="add-btn" onclick="add('Jada Roberts #11', 'jada.png', 'jada.mp3', null, 'btn-11')">+ ADD TO LINEUP</button></td>
+            </tr>
+            <tr>
+                <td><img src="alexis.png" class="roster-img"></td>
+                <td>Alexis Daphney #12</td>
+                <td><button id="btn-12" class="add-btn" onclick="add('Alexis Daphney #12', 'alexis.png', 'alexis.mp3', 'alexis2.mp3', 'btn-12')">+ ADD TO LINEUP</button></td>
+            </tr>
+            <tr>
+                <td><img src="lena.png" class="roster-img"></td>
+                <td>Lena Sellam #14</td>
+                <td><button id="btn-14" class="add-btn" onclick="add('Lena Sellam #14', 'lena.png', 'lena.mp3', null, 'btn-14')">+ ADD TO LINEUP</button></td>
+            </tr>
+            <tr>
+                <td><img src="sydney.png" class="roster-img"></td>
+                <td>Sydney Strickland #15</td>
+                <td><button id="btn-15" class="add-btn" onclick="add('Sydney Strickland #15', 'sydney.png', 'sydney.mp3', null, 'btn-15')">+ ADD TO LINEUP</button></td>
+            </tr>
+            <tr>
+                <td><img src="daria.png" class="roster-img"></td>
+                <td>Daria Bush #20</td>
+                <td><button id="btn-20" class="add-btn" onclick="add('Daria Bush #20', 'daria.png', 'daria.mp3', 'daria2.mp3', 'btn-20')">+ ADD TO LINEUP</button></td>
+            </tr>
+            <tr>
+                <td><img src="jordyn.png" class="roster-img"></td>
+                <td>Jordyn Hopper #21</td>
+                <td><button id="btn-21" class="add-btn" onclick="add('Jordyn Hopper #21', 'jordyn.png', 'jordyn.mp3', null, 'btn-21')">+ ADD TO LINEUP</button></td>
+            </tr>
+            <tr>
+                <td><img src="zoee.png" class="roster-img"></td>
+                <td>Zoee Barrett #23</td>
+                <td><button id="btn-23" class="add-btn" onclick="add('Zoee Barrett #23', 'zoee.png', 'zoee.mp3', null, 'btn-23')">+ ADD TO LINEUP</button></td>
+            </tr>
+            <tr>
+                <td><img src="andreya.png" class="roster-img"></td>
+                <td>Andreya Hunter #24</td>
+                <td><button id="btn-24" class="add-btn" onclick="add('Andreya Hunter #24', 'andreya.png', 'andreya.mp3', null, 'btn-24')">+ ADD TO LINEUP</button></td>
+            </tr>
+            <tr>
+                <td><img src="olivia.png" class="roster-img"></td>
+                <td>Olivia Jenkins #25</td>
+                <td><button id="btn-25" class="add-btn" onclick="add('Olivia Jenkins #25', 'olivia.png', 'olivia.mp3', null, 'btn-25')">+ ADD TO LINEUP</button></td>
+            </tr>
+        </table>
+    </div>
 
-    <audio id="mainPlayer"></audio>
+    <audio id="player"></audio>
 
     <script>
-        var player = document.getElementById('mainPlayer');
+        const audio = document.getElementById('player');
+        function playS(file) { audio.src = file; audio.play(); }
+        function stopS() { audio.pause(); audio.currentTime = 0; }
 
-        function playSong(file) {
-            player.src = file;
-            player.play();
+        function add(name, img, song, song2, btnId) {
+            const btn = document.getElementById(btnId);
+            if (btn.classList.contains('added-state')) return;
+
+            btn.classList.add('added-state');
+            btn.innerHTML = "✓ ADDED";
+
+            const card = document.createElement('div');
+            card.className = 'player-card';
+            card.id = 'lineup-' + btnId;
+
+            let audioBtns = `<div class="btn-row">
+                <button class="play-btn" onclick="playS('${song}')">▶</button>
+                <button class="stop-btn" onclick="stopS()">🛑</button>
+            </div>`;
+
+            if (song2) {
+                audioBtns = `<div class="btn-row">
+                    <button class="play-btn" onclick="playS('${song}')">BAT</button>
+                    <button class="pitch-btn" onclick="playS('${song2}')">PITCH</button>
+                    <button class="stop-btn" onclick="stopS()">🛑</button>
+                </div>`;
+            }
+
+            card.innerHTML = `
+                <div style="display: flex; flex-direction: column;">
+                    <button class="arrow-btn" onclick="move(this, true)">↑</button>
+                    <button class="arrow-btn" onclick="move(this, false)">↓</button>
+                </div>
+                <div style="position: relative; margin-left:10px;">
+                    <div class="next-up-badge">NEXT UP</div>
+                    <img src="${img}" class="player-img-main">
+                </div>
+                <div class="player-name">${name}</div>
+                <div class="btn-row">
+                    <button class="star-btn" onclick="this.parentElement.parentElement.classList.toggle('starred'); this.classList.toggle('active')">⭐</button>
+                    ${audioBtns}
+                    <button class="remove-btn" onclick="removeFromLineup('${btnId}')">❌</button>
+                </div>`;
+            document.getElementById('lineup-list').appendChild(card);
         }
 
-        function stopSong() {
-            player.pause();
-            player.currentTime = 0; // Resets song to the start
+        function move(btn, up) {
+            const card = btn.closest('.player-card');
+            if (up && card.previousElementSibling) {
+                card.parentNode.insertBefore(card, card.previousElementSibling);
+            } else if (!up && card.nextElementSibling) {
+                card.parentNode.insertBefore(card.nextElementSibling, card);
+            }
+        }
+
+        function removeFromLineup(btnId) {
+            document.getElementById('lineup-' + btnId).remove();
+            const btn = document.getElementById(btnId);
+            btn.classList.remove('added-state');
+            btn.innerHTML = "+ ADD TO LINEUP";
+        }
+
+        function resetLineup() {
+            document.getElementById('lineup-list').innerHTML = '';
+            document.querySelectorAll('.add-btn').forEach(btn => {
+                btn.classList.remove('added-state');
+                btn.innerHTML = "+ ADD TO LINEUP";
+            });
         }
     </script>
-
 </body>
 </html>
